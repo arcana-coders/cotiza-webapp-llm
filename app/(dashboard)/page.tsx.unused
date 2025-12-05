@@ -1,0 +1,69 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-gray-600">Bienvenido al sistema de cotizaciones</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Total de Cotizaciones
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">0</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Última Cotización
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-gray-500">Sin cotizaciones aún</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Nueva Cotización</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Crea una nueva cotización usando nuestro asistente con IA. El sistema te guiará
+              paso a paso para generar tu cotización de manera rápida y eficiente.
+            </p>
+            <Link href="/dashboard/nueva">
+              <Button>Crear Nueva Cotización</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Ver Cotizaciones</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Accede a todas tus cotizaciones anteriores, descarga PDFs, y gestiona tus documentos.
+            </p>
+            <Link href="/dashboard/cotizaciones">
+              <Button variant="outline">Ver Todas las Cotizaciones</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
