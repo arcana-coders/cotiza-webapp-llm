@@ -50,7 +50,7 @@ export default function DashboardLayout({
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-8">
             {navigation.map((item) => (
               <Link
                 key={item.href}
@@ -73,7 +73,7 @@ export default function DashboardLayout({
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="lg:hidden"
             onClick={() => setMenuOpen(true)}
             aria-label="Abrir menú"
           >
@@ -85,7 +85,7 @@ export default function DashboardLayout({
       {/* Mobile Full Screen Overlay Menu */}
       <div
         className={cn(
-            "fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm transition-all duration-300 md:hidden",
+            "fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm transition-all duration-300 lg:hidden",
             menuOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
         )}
       >
