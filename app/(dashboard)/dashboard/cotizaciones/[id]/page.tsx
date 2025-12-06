@@ -162,13 +162,15 @@ export default function QuotationDetailPage() {
           <CardTitle className="text-lg text-foreground">Vista previa</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="rounded-2xl border border-slate-800/60 bg-white">
-            <iframe
-              srcDoc={quotation.html ?? undefined}
-              className="w-full h-[800px] border-0"
-              title="Vista previa de la cotización"
-              sandbox="allow-same-origin"
-            />
+          <div className="flex w-full justify-center overflow-auto">
+            <div className="w-[816px] max-w-full overflow-hidden rounded-2xl border border-slate-800/60 bg-white shadow-[0_24px_60px_rgba(4,10,20,0.35)]">
+              <iframe
+                srcDoc={quotation.html ?? undefined}
+                className="h-[1056px] w-full border-0"
+                title="Vista previa de la cotización"
+                sandbox="allow-same-origin allow-scripts"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

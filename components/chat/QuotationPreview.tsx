@@ -149,19 +149,21 @@ export function QuotationPreview({ html, jsonData, quotationId }: QuotationPrevi
 
       <CardContent className="flex flex-1 flex-col gap-4 overflow-hidden p-6 pb-8">
         {/* Preview iframe */}
-        <div className="flex-1 overflow-hidden rounded-2xl border border-slate-800/80 bg-white">
-          {previewHtml ? (
-            <iframe
-              srcDoc={previewHtml}
-              className="h-full w-full"
-              title="Quotation Preview"
-              sandbox="allow-same-origin"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-primary/70" />
-            </div>
-          )}
+        <div className="flex-1 overflow-auto">
+          <div className="mx-auto w-[816px] max-w-full overflow-hidden rounded-2xl border border-slate-800/80 bg-white shadow-[0_24px_60px_rgba(4,10,20,0.35)]">
+            {previewHtml ? (
+              <iframe
+                srcDoc={previewHtml}
+                className="h-[1056px] w-full"
+                title="Quotation Preview"
+                sandbox="allow-same-origin allow-scripts"
+              />
+            ) : (
+              <div className="flex h-[1056px] items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary/70" />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Quotation summary */}

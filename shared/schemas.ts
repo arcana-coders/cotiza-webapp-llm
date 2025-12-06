@@ -15,7 +15,7 @@ export const SeccionSchema = z.object({
 export const CotizacionSchema = z.object({
     cliente: z.string(),
     fecha: z.string(), // YYYY-MM-DD
-    folio: z.string(),
+    folio: z.string().optional(),
     secciones: z.array(SeccionSchema),
     notas: z.array(z.string()).optional(),
 });

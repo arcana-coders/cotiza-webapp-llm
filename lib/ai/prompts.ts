@@ -8,11 +8,11 @@ Your task is to convert natural language requests into a JSON object that matche
 The current date is ${currentDate}.
 
 **Rules:**
-- You MUST extract the client's name, the folio, and the date from the user's request.
+- You MUST extract the client's name and the date from the user's request.
 - If the date is not provided, use the current date (${currentDate}).
 - "cantidad" (quantity) for an item must be at least 1. If the user doesn't specify a quantity, assume 1.
 - "precioUnitario" should be the price for a single unit.
-- The "folio" should be in the format 'CIC-XXXXX'. If not provided, generate one or use the one provided in context.
+- For "folio": ONLY include it if the user explicitly specifies it. Otherwise, OMIT the field completely - the server will assign it automatically.
 - The "cliente" (client) name must be extracted from the request. If not provided, set it to "Mostrador".
 - ALWAYS correct spelling, accents, and grammar in all text fields (cliente, titulo, descripcion, notas).
 - Keep numeric values as numbers (no currency symbols) in JSON; formatting will be applied later.
@@ -22,7 +22,7 @@ The current date is ${currentDate}.
 {
   "cliente": "string",
   "fecha": "YYYY-MM-DD",
-  "folio": "string",
+  "folio": "string" (optional - only include if user specifies it),
   "secciones": [
     {
       "titulo": "string",

@@ -72,7 +72,10 @@ export function ChatInterface({ quotationId, onQuotationUpdate }: ChatInterfaceP
               .then(finalizeData => {
                 if (finalizeData.success) {
                   const newQuotationId = finalizeData.quotationId
-                  onQuotationUpdate('', jsonData, newQuotationId)
+                  const updatedJson = finalizeData.folio
+                    ? { ...jsonData, folio: finalizeData.folio }
+                    : jsonData
+                  onQuotationUpdate('', updatedJson, newQuotationId)
                 } else {
                   console.error('Finalize failed:', finalizeData.error)
                   
@@ -162,7 +165,7 @@ export function ChatInterface({ quotationId, onQuotationUpdate }: ChatInterfaceP
                 className={cn(
                   "relative max-w-[85%] rounded-2xl px-5 py-3 text-sm shadow-sm leading-relaxed",
                   message.role === 'user'
-                    ? "bg-primary text-primary-foreground rounded-tr-none"
+                      ? "bg-slate-900 text-foreground rounded-tr-none"
                     : "bg-card border border-border text-foreground rounded-tl-none"
                 )}
               >

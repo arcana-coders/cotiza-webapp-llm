@@ -18,74 +18,95 @@ export async function POST(req: Request) {
     // Validate with Zod
     const validated = CotizacionSchema.parse(jsonData)
 
-    // Generate HTML preview
-    const html = await generateHTML(validated)
+    // Helper to compute next folio based on latest
+    const computeNextFolio = (lastFolio?: string) => {
+      if (!lastFolio) return 'CIC-00001'
+      const match = lastFolio.match(/(\d+)$/)
+      if (!match || match.index === undefined) return 'CIC-00001'
+      const currentNumber = parseInt(match[1])
+      const prefix = lastFolio.substring(0, match.index)
+      return `${prefix}${String(currentNumber + 1).padStart(match[1].length, '0')}`
+    }
+
+    // Get latest folio for the user to derive the next available
+    const { data: latestQuotation } = await supabase
+      .from('quotations')
+      .select('folio')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    // Use provided folio if available and not empty, otherwise compute next
+    let finalFolio = validated.folio?.trim() || ''
+    if (!finalFolio) {
+      finalFolio = computeNextFolio(latestQuotation?.folio)
+    }
 
     let result
     if (quotationId) {
       // Update existing by ID (editing from dashboard)
+      // When updating, preserve existing folio if not provided
+      const updateFolio = validated.folio?.trim() || finalFolio
+      const finalizedData = { ...validated, folio: updateFolio }
+      const html = await generateHTML(finalizedData)
+      
       result = await supabase
         .from('quotations')
         .update({
-          json_data: validated,
+          folio: updateFolio,
+          json_data: finalizedData,
           html,
-          cliente: validated.cliente,
-          fecha: validated.fecha,
+          cliente: finalizedData.cliente,
+          fecha: finalizedData.fecha,
           updated_at: new Date().toISOString(),
         })
         .eq('id', quotationId)
         .eq('user_id', user.id)
         .select('id')
         .single()
+      
+      finalFolio = finalizedData.folio
     } else {
-      // Creating new - check if folio already exists
-      const { data: existing } = await supabase
-        .from('quotations')
-        .select('folio')
-        .eq('user_id', user.id)
-        .eq('folio', validated.folio)
-        .maybeSingle()
+      // Creating new - ensure folio is unique, keep trying until we find available one
+      let attempts = 0
+      const maxAttempts = 100
+      let isUnique = false
 
-      if (existing) {
-        // Folio already exists - get next available folio
-        const { data: latestQuotation } = await supabase
+      while (!isUnique && attempts < maxAttempts) {
+        const { data: existing } = await supabase
           .from('quotations')
           .select('folio')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
+          .eq('folio', finalFolio)
           .maybeSingle()
 
-        let nextFolio = validated.folio
-        if (latestQuotation?.folio) {
-          // Extract number from folio format (e.g., "CIC-00123" -> 123)
-          const match = latestQuotation.folio.match(/(\d+)$/)
-          if (match) {
-            const currentNumber = parseInt(match[1])
-            const prefix = latestQuotation.folio.substring(0, match.index)
-            nextFolio = `${prefix}${String(currentNumber + 1).padStart(match[1].length, '0')}`
-          }
+        if (existing) {
+          // Folio exists, try the next one
+          finalFolio = computeNextFolio(finalFolio)
+          attempts++
+        } else {
+          isUnique = true
         }
-
-        return Response.json(
-          {
-            success: false,
-            error: `El folio ${validated.folio} ya existe. El siguiente folio disponible es: ${nextFolio}`,
-            suggestedFolio: nextFolio,
-          },
-          { status: 409 }
-        )
       }
+
+      if (!isUnique) {
+        throw new Error('No se pudo encontrar un folio disponible después de 100 intentos')
+      }
+
+      // Always use the resolved folio for everything
+      const finalizedData = { ...validated, folio: finalFolio }
+      const html = await generateHTML(finalizedData)
 
       // Create new quotation
       result = await supabase
         .from('quotations')
         .insert({
           user_id: user.id,
-          folio: validated.folio,
-          cliente: validated.cliente,
-          fecha: validated.fecha,
-          json_data: validated,
+          folio: finalFolio,
+          cliente: finalizedData.cliente,
+          fecha: finalizedData.fecha,
+          json_data: finalizedData,
           html,
           status: 'draft',
         })
@@ -100,10 +121,13 @@ export async function POST(req: Request) {
     return Response.json({
       success: true,
       quotationId: result.data?.id,
+      folio: finalFolio,
     })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
+    const errorDetails = error instanceof Error ? error.stack : JSON.stringify(error)
     console.error('Finalize error:', message)
+    console.error('Error details:', errorDetails)
     return Response.json(
       {
         success: false,

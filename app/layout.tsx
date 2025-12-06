@@ -15,13 +15,14 @@ export default function RootLayout({
   const currentYear = new Date().getFullYear()
 
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body
+        suppressHydrationWarning
         className="antialiased bg-background text-foreground font-['Inter',sans-serif]"
       >
         <div className="flex min-h-screen flex-col bg-background">
