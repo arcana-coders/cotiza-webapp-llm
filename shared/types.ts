@@ -16,7 +16,7 @@ export interface ProcessedSeccion {
 export interface CotizacionData {
     cliente: string;
     fecha: string;
-    folio: string;
+    folio?: string;
     secciones: ProcessedSeccion[];
     subtotal: string;
     iva: string;

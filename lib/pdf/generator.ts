@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import handlebars from 'handlebars';
 import fs from 'fs/promises';
@@ -69,11 +69,11 @@ export async function generateHTML(input: CotizacionInput): Promise<string> {
 export async function generatePDFBuffer(input: CotizacionInput): Promise<Uint8Array> {
     const html = await generateHTML(input);
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
 
     let browser;
     if (isProduction) {
-      // Configuration for Vercel
+      // Configuration for Vercel/Production - use @sparticuz/chromium
       browser = await puppeteer.launch({
         args: chromium.args,
         executablePath: await chromium.executablePath(),
@@ -81,10 +81,18 @@ export async function generatePDFBuffer(input: CotizacionInput): Promise<Uint8Ar
       });
     } else {
       // Configuration for Local Development
+      // puppeteer-core doesn't include Chrome, so we need to specify the path
+      const executablePath = process.env.CHROME_EXECUTABLE_PATH ||
+        process.platform === 'win32'
+          ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+          : process.platform === 'darwin'
+          ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+          : '/usr/bin/google-chrome';
+
       browser = await puppeteer.launch({
         headless: true,
-        // Optional: if you have problems locally, point to your chrome installation
-        // executablePath: 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+        executablePath,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
     }
 

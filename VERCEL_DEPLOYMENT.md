@@ -42,11 +42,46 @@ You need to set these environment variables in your Vercel project dashboard:
 - Each environment (Preview, Production) can have different variables
 - Node.js runtime is required (Puppeteer for PDF generation)
 
-## Puppeteer Configuration
+## PDF Generation with Puppeteer & Chromium
 
-The app uses Puppeteer for PDF generation. Make sure:
-- `app/api/generate-pdf/route.ts` has `export const runtime = 'nodejs'`
-- This ensures the function runs on Node.js runtime (Chromium available)
+### Configuration for Vercel Serverless
+
+The app uses **puppeteer-core** with **@sparticuz/chromium** for PDF generation in production. This setup is required for Vercel's serverless environment.
+
+#### Important Requirements:
+
+1. **Dependencies** (package.json):
+   - `puppeteer-core@23.11.1` - Puppeteer without bundled Chromium
+   - `@sparticuz/chromium@^141.0.0` - Chromium binary optimized for serverless
+   - **Note**: Use `puppeteer-core` NOT `puppeteer` to avoid binary conflicts
+
+2. **Runtime Configuration** (app/api/generate-pdf/route.ts):
+   - Must have `export const runtime = 'nodejs'`
+   - Ensures the function runs on Node.js runtime (Edge runtime doesn't support Chromium)
+
+3. **Next.js Configuration** (next.config.ts):
+   - `serverExternalPackages: ['@sparticuz/chromium']`
+   - Prevents Next.js from bundling Chromium binaries incorrectly
+
+#### Local Development
+
+For local development, the code automatically detects Chrome in standard locations:
+- **Windows**: `C:\Program Files\Google\Chrome\Application\chrome.exe`
+- **macOS**: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
+- **Linux**: `/usr/bin/google-chrome`
+
+You can override with environment variable:
+```bash
+CHROME_EXECUTABLE_PATH=/path/to/chrome
+```
+
+#### Troubleshooting
+
+If you encounter errors like "The input directory does not exist" or brotli-related errors:
+1. Verify you're using `puppeteer-core` (not `puppeteer`)
+2. Check version compatibility: puppeteer-core@23.11.x with @sparticuz/chromium@141.x
+3. Ensure `serverExternalPackages` is configured in next.config.ts
+4. Clear Vercel build cache and redeploy
 
 ## Rate Limits
 
