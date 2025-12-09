@@ -51,8 +51,9 @@ The app uses **puppeteer-core** with **@sparticuz/chromium** for PDF generation 
 #### Important Requirements:
 
 1. **Dependencies** (package.json):
-   - `puppeteer-core@23.11.1` - Puppeteer without bundled Chromium
-   - `@sparticuz/chromium@^141.0.0` - Chromium binary optimized for serverless
+   - `puppeteer-core@23.11.1` - Puppeteer without bundled Chromium (uses Chrome 131.x)
+   - `@sparticuz/chromium@131.0.1` - Chromium binary optimized for serverless
+   - **Critical**: Version numbers must match! puppeteer-core 23.11.x requires @sparticuz/chromium 131.x
    - **Note**: Use `puppeteer-core` NOT `puppeteer` to avoid binary conflicts
 
 2. **Runtime Configuration** (app/api/generate-pdf/route.ts):
@@ -78,9 +79,11 @@ CHROME_EXECUTABLE_PATH=/path/to/chrome
 #### Troubleshooting
 
 If you encounter errors like "The input directory does not exist" or brotli-related errors:
-1. Verify you're using `puppeteer-core` (not `puppeteer`)
-2. Check version compatibility: puppeteer-core@23.11.x with @sparticuz/chromium@141.x
-3. Ensure `serverExternalPackages` is configured in next.config.ts
+1. **Version Mismatch**: This is usually caused by incompatible versions. Ensure puppeteer-core and @sparticuz/chromium versions match:
+   - puppeteer-core 23.11.x (Chrome 131) → @sparticuz/chromium 131.x
+   - Check [Puppeteer Chromium Support](https://pptr.dev/chromium-support/) for version mapping
+2. Verify you're using `puppeteer-core` (not `puppeteer`)
+3. Ensure `serverExternalPackages: ['@sparticuz/chromium']` is configured in next.config.ts
 4. Clear Vercel build cache and redeploy
 
 ## Rate Limits
