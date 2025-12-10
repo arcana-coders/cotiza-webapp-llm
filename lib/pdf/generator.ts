@@ -84,7 +84,6 @@ export async function generatePDFBuffer(input: CotizacionInput): Promise<Uint8Ar
         defaultViewport: chromium.defaultViewport,
         executablePath,
         headless: chromium.headless,
-        ignoreHTTPSErrors: true,
       });
     } else {
       // Configuration for Local Development
