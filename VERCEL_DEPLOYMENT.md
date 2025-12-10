@@ -42,55 +42,29 @@ You need to set these environment variables in your Vercel project dashboard:
 - Each environment (Preview, Production) can have different variables
 - Node.js runtime is required (Puppeteer for PDF generation)
 
-## PDF Generation with Puppeteer & Chromium
+## PDF Generation (External Microservice)
 
-### Configuration for Vercel Serverless
+The app now uses a dedicated microservice for PDF generation to avoid Vercel Serverless Function size limits (50MB).
 
-The app uses **puppeteer-core** with **@sparticuz/chromium** for PDF generation in production. This setup is required for Vercel's serverless environment.
+- **Architecture**: Next.js app calls `POST /generate-pdf` on an external Node.js service (hosted on Render.com).
+- **Service**: `cotiza-pdf-service` (Repo: `arcana-coders/cotiza-pdf-service`)
+- **Authentication**: Shared secret token via `X-PDF-SERVICE-TOKEN` header.
 
-#### Important Requirements:
+### Required Environment Variables
 
-1. **Dependencies** (package.json):
-   - `puppeteer-core@23.11.1` - Puppeteer without bundled Chromium (uses Chrome 131.x)
-   - `@sparticuz/chromium@131.0.1` - Chromium binary optimized for serverless
-   - **Critical**: Version numbers must match! puppeteer-core 23.11.x requires @sparticuz/chromium 131.x
-   - **Note**: Use `puppeteer-core` NOT `puppeteer` to avoid binary conflicts
+Add these to your Vercel project settings:
 
-2. **Runtime Configuration** (app/api/generate-pdf/route.ts):
-   - `export const runtime = 'nodejs'` (Edge no soporta Chromium)
-   - `export const maxDuration = 60` para dar tiempo al arranque de Chromium en serverless
+- `PDF_SERVICE_URL` - The URL of the microservice (e.g., `https://cotiza-pdf-service.onrender.com/generate-pdf`)
+- `PDF_SERVICE_TOKEN` - The secure token shared between Vercel and the microservice.
 
-3. **Next.js Configuration** (next.config.ts):
-   - `serverExternalPackages: ['@sparticuz/chromium']`
-   - Evita que Next.js empaquete Chromium de forma incorrecta
-
-4. **Launch Options (producción)**:
-   - Se usa `puppeteer.launch({ args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'], defaultViewport: chromium.defaultViewport, executablePath, headless: chromium.headless })`
-   - No se usa `ignoreHTTPSErrors` (no existe en `LaunchOptions` de puppeteer-core 23.x)
-
-#### Local Development
-
-For local development, the code automatically detects Chrome in standard locations:
-- **Windows**: `C:\Program Files\Google\Chrome\Application\chrome.exe`
-- **macOS**: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`
-- **Linux**: `/usr/bin/google-chrome`
-
-You can override with environment variable:
-```bash
-CHROME_EXECUTABLE_PATH=/path/to/chrome
-```
-
-#### Troubleshooting
-
-If you encounter errors like "The input directory does not exist" or brotli-related errors:
-1. **Version Mismatch**: This is usually caused by incompatible versions. Ensure puppeteer-core and @sparticuz/chromium versions match:
-   - puppeteer-core 23.11.x (Chrome 131) → @sparticuz/chromium 131.x
-   - Check [Puppeteer Chromium Support](https://pptr.dev/chromium-support/) for version mapping
-2. Verify you're using `puppeteer-core` (not `puppeteer`)
-3. Ensure `serverExternalPackages: ['@sparticuz/chromium']` is configured in next.config.ts
-4. Clear Vercel build cache and redeploy
+### Why this change?
+We moved from `@sparticuz/chromium` (Serverless Chromium) to a dedicated `puppeteer` service because:
+1. **Size Limits**: Vercel has strict 50MB limits for Serverless Functions. Including Chromium binaries often breaks deployments.
+2. **Reliability**: A dedicated service with full Puppeteer/Chrome is more reliable for consistent rendering than the stripped-down serverless binaries.
+3. **Speed**: "Warm" instances on Render can render PDFs faster than cold-booting serverless functions.
 
 ## Rate Limits
 
 - **Gemini API**: 10 RPM, 250K TPM (free tier)
 - Monitor usage at Google Cloud Console
+

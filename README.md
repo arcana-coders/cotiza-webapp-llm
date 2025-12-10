@@ -8,7 +8,7 @@ Sistema web moderno para generar cotizaciones usando inteligencia artificial (Ol
 - **Supabase** - Base de datos PostgreSQL + Autenticación + Storage
 - **Vercel AI SDK** - Integración con LLMs (Ollama/Gemini)
 - **Tailwind CSS + shadcn/ui** - Diseño y componentes
-- **Puppeteer** - Generación de PDFs (con `puppeteer-core` + `@sparticuz/chromium` en producción)
+- **Puppeteer** - Generación de PDFs (delegada a microservicio externo en Render)
 
 ## Características
 
@@ -126,6 +126,10 @@ CREATE POLICY "Users can insert own profile during signup"
 
    # Next.js
    NEXT_PUBLIC_APP_URL=http://localhost:3000
+   
+   # PDF Service (Nuevo!)
+   PDF_SERVICE_URL=https://cotiza-pdf-service.onrender.com/generate-pdf
+   PDF_SERVICE_TOKEN=your-service-token
    ```
 
 ### 6. Instalar Dependencias y Ejecutar
@@ -137,11 +141,9 @@ npm run dev
 
 La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
 
-### Nota sobre PDFs en Vercel
+### Nota sobre PDFs en Producción
 
-- La ruta `app/api/generate-pdf/route.ts` usa `runtime = 'nodejs'` y `maxDuration = 60` para dar tiempo a que Chromium inicie en serverless.
-- En producción se lanza con `@sparticuz/chromium` (args incluyen `--no-sandbox`) y `serverExternalPackages: ['@sparticuz/chromium']` en `next.config.ts`.
-- Para desarrollo local se usa tu Chrome instalado o la variable `CHROME_EXECUTABLE_PATH`.
+La generación de PDFs se delega a un microservicio externo (`pdf-service`) hospedado en Render para evitar limitaciones de tamaño en Vercel Serverless Functions. Asegúrate de configurar `PDF_SERVICE_URL` y `PDF_SERVICE_TOKEN` en tus variables de entorno.
 
 ## Uso
 
