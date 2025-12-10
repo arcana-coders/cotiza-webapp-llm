@@ -3,6 +3,7 @@ import { generatePDFBuffer } from '@/lib/pdf/generator';
 import { CotizacionSchema } from '@/shared/schemas';
 
 export const runtime = 'nodejs'; // Puppeteer requires Node runtime
+export const maxDuration = 60; // Allow enough time for Chromium startup on serverless
 
 export async function POST(req: Request) {
   try {

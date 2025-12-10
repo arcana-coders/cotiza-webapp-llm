@@ -74,10 +74,17 @@ export async function generatePDFBuffer(input: CotizacionInput): Promise<Uint8Ar
     let browser;
     if (isProduction) {
       // Configuration for Vercel/Production - use @sparticuz/chromium
+      const executablePath = await chromium.executablePath();
+      if (!executablePath) {
+        throw new Error('Chromium executable path not found');
+      }
+
       browser = await puppeteer.launch({
-        args: chromium.args,
-        executablePath: await chromium.executablePath(),
-        headless: true,
+        args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+        defaultViewport: chromium.defaultViewport,
+        executablePath,
+        headless: chromium.headless,
+        ignoreHTTPSErrors: true,
       });
     } else {
       // Configuration for Local Development
