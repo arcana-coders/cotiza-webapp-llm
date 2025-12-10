@@ -143,7 +143,23 @@ La aplicación estará disponible en [http://localhost:3000](http://localhost:30
 
 ### Nota sobre PDFs en Producción
 
-La generación de PDFs se delega a un microservicio externo (`pdf-service`) hospedado en Render para evitar limitaciones de tamaño en Vercel Serverless Functions. Asegúrate de configurar `PDF_SERVICE_URL` y `PDF_SERVICE_TOKEN` en tus variables de entorno.
+La generación de PDFs se delega a un microservicio externo (`cotiza-pdf-service`) hospedado en Render.com.
+
+**¿Por qué un microservicio separado?**
+- Vercel serverless no tiene todas las librerías del sistema que Chrome necesita (`libnss3.so`, etc.)
+- El microservicio en Render usa Puppeteer con Chrome completo
+- 100% gratis usando:
+  - Plan Free de Render (750 horas/mes)
+  - Cron job gratuito en cron-job.org para keep-alive (ping cada 14 minutos)
+
+**Configuración requerida:**
+1. Despliega el microservicio en Render (repo: `arcana-coders/cotiza-pdf-service`)
+2. Configura cron job en cron-job.org apuntando a `https://cotiza-pdf-service.onrender.com/health`
+3. Agrega variables de entorno en Vercel:
+   - `PDF_SERVICE_URL=https://cotiza-pdf-service.onrender.com/generate-pdf`
+   - `PDF_SERVICE_TOKEN=<tu-token-seguro>`
+
+Ver documentación completa en [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)
 
 ## Uso
 

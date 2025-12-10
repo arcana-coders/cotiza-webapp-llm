@@ -7,12 +7,14 @@ You need to set these environment variables in your Vercel project dashboard:
 ### Required for Supabase (Database & Auth)
 - `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Your Supabase anonymous key
+- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (for server-side operations)
 
 ### Required for Gemini AI
 - `GEMINI_API_KEY` - Your Google Gemini API key
 
-### Database
-- `SUPABASE_SERVICE_ROLE_KEY` - Service role key (for server-side operations)
+### Required for PDF Service (Microservice on Render)
+- `PDF_SERVICE_URL` - URL del microservicio (e.g., `https://cotiza-pdf-service.onrender.com/generate-pdf`)
+- `PDF_SERVICE_TOKEN` - Token compartido para autenticación entre Vercel y el microservicio
 
 ## Setup Steps
 
@@ -44,24 +46,45 @@ You need to set these environment variables in your Vercel project dashboard:
 
 ## PDF Generation (External Microservice)
 
-The app now uses a dedicated microservice for PDF generation to avoid Vercel Serverless Function size limits (50MB).
+La aplicación usa un microservicio dedicado para generar PDFs, evitando las limitaciones de Vercel Serverless Functions.
 
-- **Architecture**: Next.js app calls `POST /generate-pdf` on an external Node.js service (hosted on Render.com).
-- **Service**: `cotiza-pdf-service` (Repo: `arcana-coders/cotiza-pdf-service`)
-- **Authentication**: Shared secret token via `X-PDF-SERVICE-TOKEN` header.
+### Arquitectura
 
-### Required Environment Variables
+```
+┌─────────────┐      API Request       ┌──────────────────┐
+│             │ ───────────────────────>│                  │
+│   Vercel    │  POST /api/generate-pdf │  Render.com      │
+│  (Next.js)  │  + PDF_SERVICE_TOKEN    │  (Microservice)  │
+│             │ <───────────────────────│  + Puppeteer     │
+└─────────────┘      PDF Binary         └──────────────────┘
+```
 
-Add these to your Vercel project settings:
+### Componentes
 
-- `PDF_SERVICE_URL` - The URL of the microservice (e.g., `https://cotiza-pdf-service.onrender.com/generate-pdf`)
-- `PDF_SERVICE_TOKEN` - The secure token shared between Vercel and the microservice.
+- **Proyecto principal**: `cotiza-web` (Este repo) - Desplegado en Vercel
+- **Microservicio**: `cotiza-pdf-service` (Repo: `arcana-coders/cotiza-pdf-service`) - Desplegado en Render.com
+- **Autenticación**: Token compartido vía header `X-PDF-SERVICE-TOKEN`
+- **Keep-Alive**: Cron job en cron-job.org mantiene el servicio despierto (gratis)
 
-### Why this change?
-We moved from `@sparticuz/chromium` (Serverless Chromium) to a dedicated `puppeteer` service because:
-1. **Size Limits**: Vercel has strict 50MB limits for Serverless Functions. Including Chromium binaries often breaks deployments.
-2. **Reliability**: A dedicated service with full Puppeteer/Chrome is more reliable for consistent rendering than the stripped-down serverless binaries.
-3. **Speed**: "Warm" instances on Render can render PDFs faster than cold-booting serverless functions.
+### Variables de Entorno Requeridas en Vercel
+
+```bash
+PDF_SERVICE_URL=https://cotiza-pdf-service.onrender.com/generate-pdf
+PDF_SERVICE_TOKEN=<tu-token-seguro>
+```
+
+### Por qué un Microservicio Externo?
+
+Intentamos usar `@sparticuz/chromium` en Vercel pero encontramos problemas:
+1. **Dependencias del Sistema**: Error `libnss3.so: cannot open shared object file` - Vercel serverless no tiene todas las librerías que Chrome necesita
+2. **Límites de Tamaño**: Vercel tiene límite de 50MB para funciones serverless
+3. **Complejidad**: Chromium para serverless es una versión reducida que puede tener inconsistencias
+
+Con el microservicio en Render:
+- ✅ Chrome completo con todas las dependencias
+- ✅ Renderizado consistente y confiable
+- ✅ Sin límites de tamaño
+- ✅ 100% gratis con plan Free de Render + cron job para keep-alive
 
 ## Rate Limits
 
