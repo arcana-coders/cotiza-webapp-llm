@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm uninstall:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Replace puppeteer with puppeteer-core for Vercel compatibility\n\nSoluciona el error \"The input directory does not exist\" en producción al generar PDFs.\n\nCambios:\n- Reemplaza puppeteer con puppeteer-core@23.11.1 para compatibilidad con @sparticuz/chromium\n- Actualiza lib/pdf/generator.ts para usar puppeteer-core con detección automática de Chrome en desarrollo\n- Agrega serverExternalPackages en next.config.ts para optimizar el empaquetado en Vercel\n- Corrige tipo opcional de folio en shared/types.ts\n- Actualiza documentación en VERCEL_DEPLOYMENT.md con guía completa de configuración\n\nEsto permite que la generación de PDFs funcione correctamente en el entorno serverless de Vercel.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

@@ -8,7 +8,7 @@ export const maxDuration = 60; // Allow enough time for Chromium startup on serv
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
-    
+
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { quotationId, quotationData } = body;
+    const { quotationData } = body;
 
     if (!quotationData) {
       return Response.json({
@@ -28,18 +28,38 @@ export async function POST(req: Request) {
     // Validate data with Zod
     const validated = CotizacionSchema.parse(quotationData);
 
-    // Generate PDF (Puppeteer) - already returns Uint8Array
-    const pdfBuffer = await generatePDFBuffer(validated);
+    const LOGTAG = '[PDF-ROUTE]';
+    const serviceUrl = process.env.PDF_SERVICE_URL;
+    const serviceToken = process.env.PDF_SERVICE_TOKEN;
+
+    if (!serviceUrl || !serviceToken) {
+      console.error(`${LOGTAG} Missing PDF_SERVICE_URL or PDF_SERVICE_TOKEN env vars.`);
+      throw new Error('Server configuration error: PDF service not linked');
+    }
+
+    console.log(`${LOGTAG} Calling microservice at ${serviceUrl}...`);
+
+    // Call Microservice
+    const response = await fetch(serviceUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-PDF-SERVICE-TOKEN': serviceToken,
+      },
+      body: JSON.stringify({ quotationData: validated }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`${LOGTAG} Microservice error: ${response.status} - ${errorText}`);
+      throw new Error(`PDF Service failed: ${response.statusText}`);
+    }
+
+    const pdfArrayBuffer = await response.arrayBuffer();
 
     // Clean filename: remove special chars
     const safeClient = validated.cliente.replace(/[^a-z0-9]/gi, '_');
-    const fileName = `${validated.folio}_${safeClient}.pdf`;
-
-    // Return PDF as downloadable file: convert to ArrayBuffer for Response
-    const pdfArrayBuffer = pdfBuffer.buffer.slice(
-      pdfBuffer.byteOffset,
-      pdfBuffer.byteOffset + pdfBuffer.byteLength,
-    ) as ArrayBuffer
+    const fileName = `${validated.folio || 'cotizacion'}_${safeClient}.pdf`;
 
     return new Response(pdfArrayBuffer, {
       status: 200,

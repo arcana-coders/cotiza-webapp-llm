@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# pdf-service
+/pdf-service
+
 # testing
 /coverage
 
