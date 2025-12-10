@@ -80,7 +80,7 @@
        - [x] Incluir header `X-PDF-SERVICE-TOKEN`.
        - [x] Reenviar el PDF recibido al cliente con los mismos headers actuales.
      - [ ] Eliminar/aislar el uso de `@sparticuz/chromium` en `cotiza-web` (Opcional por ahora).
-     - [ ] Actualizar documentación donde diga que la generación de PDFs corre en un microservicio externo (Render).
+     - [x] Actualizar documentación: La generación de PDFs ahora corre en **pdf-service** (Render).
      - [ ] Configurar variables de entorno en Render:
        - [ ] `PDF_SERVICE_PORT` (si se usa).
        - [ ] `PDF_SERVICE_TOKEN` (la misma que luego usará Vercel).
