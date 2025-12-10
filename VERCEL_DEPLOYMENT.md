@@ -57,12 +57,16 @@ The app uses **puppeteer-core** with **@sparticuz/chromium** for PDF generation 
    - **Note**: Use `puppeteer-core` NOT `puppeteer` to avoid binary conflicts
 
 2. **Runtime Configuration** (app/api/generate-pdf/route.ts):
-   - Must have `export const runtime = 'nodejs'`
-   - Ensures the function runs on Node.js runtime (Edge runtime doesn't support Chromium)
+   - `export const runtime = 'nodejs'` (Edge no soporta Chromium)
+   - `export const maxDuration = 60` para dar tiempo al arranque de Chromium en serverless
 
 3. **Next.js Configuration** (next.config.ts):
    - `serverExternalPackages: ['@sparticuz/chromium']`
-   - Prevents Next.js from bundling Chromium binaries incorrectly
+   - Evita que Next.js empaquete Chromium de forma incorrecta
+
+4. **Launch Options (producción)**:
+   - Se usa `puppeteer.launch({ args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'], defaultViewport: chromium.defaultViewport, executablePath, headless: chromium.headless })`
+   - No se usa `ignoreHTTPSErrors` (no existe en `LaunchOptions` de puppeteer-core 23.x)
 
 #### Local Development
 

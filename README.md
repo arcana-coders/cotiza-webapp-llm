@@ -8,7 +8,7 @@ Sistema web moderno para generar cotizaciones usando inteligencia artificial (Ol
 - **Supabase** - Base de datos PostgreSQL + Autenticación + Storage
 - **Vercel AI SDK** - Integración con LLMs (Ollama/Gemini)
 - **Tailwind CSS + shadcn/ui** - Diseño y componentes
-- **Puppeteer** - Generación de PDFs
+- **Puppeteer** - Generación de PDFs (con `puppeteer-core` + `@sparticuz/chromium` en producción)
 
 ## Características
 
@@ -136,6 +136,12 @@ npm run dev
 ```
 
 La aplicación estará disponible en [http://localhost:3000](http://localhost:3000)
+
+### Nota sobre PDFs en Vercel
+
+- La ruta `app/api/generate-pdf/route.ts` usa `runtime = 'nodejs'` y `maxDuration = 60` para dar tiempo a que Chromium inicie en serverless.
+- En producción se lanza con `@sparticuz/chromium` (args incluyen `--no-sandbox`) y `serverExternalPackages: ['@sparticuz/chromium']` en `next.config.ts`.
+- Para desarrollo local se usa tu Chrome instalado o la variable `CHROME_EXECUTABLE_PATH`.
 
 ## Uso
 
