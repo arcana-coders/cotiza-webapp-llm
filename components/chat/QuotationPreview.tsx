@@ -156,7 +156,7 @@ export function QuotationPreview({ html, jsonData, quotationId }: QuotationPrevi
                 srcDoc={previewHtml}
                 className="h-[1056px] w-full"
                 title="Quotation Preview"
-                sandbox="allow-same-origin allow-scripts"
+                sandbox="allow-scripts"
               />
             ) : (
               <div className="flex h-[1056px] items-center justify-center">
