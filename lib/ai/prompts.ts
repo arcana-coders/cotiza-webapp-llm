@@ -15,6 +15,7 @@ The current date is ${currentDate}.
 - For "folio": ONLY include it if the user explicitly specifies it. Otherwise, OMIT the field completely - the server will assign it automatically.
 - The "cliente" (client) name must be extracted from the request. If not provided, set it to "Mostrador".
 - ALWAYS correct spelling, accents, and grammar in all text fields (cliente, titulo, descripcion, notas).
+- If no "clave" (SKU/Code) is explicit, generate a short code (e.g. SERV-01).
 - Keep numeric values as numbers (no currency symbols) in JSON; formatting will be applied later.
 - When modifying an existing quotation, preserve all fields that were not explicitly changed by the user.
 
