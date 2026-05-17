@@ -23,7 +23,7 @@
     "currency.js": "^2.0.4",
     "handlebars": "^4.7.8",
     "lucide-react": "^0.555.0",
-    "next": "16.0.7",
+    "next": "16.0.10",
     "ollama-ai-provider": "^1.2.0",
     "puppeteer-core": "^23.11.1",
     "react": "19.2.0",
